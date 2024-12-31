@@ -1,4 +1,4 @@
-# Finance Dashboard
+# ADFA: Actually Smart Finance App
 
 A modern finance dashboard application with Discord OAuth2 integration. This application provides a secure and user-friendly interface for managing financial data with Discord authentication.
 
