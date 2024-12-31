@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Finance Tracker</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="/js/static.js"></script>
+    <style>
+        .settings-section {
+            margin-bottom: 2rem;
+        }
+
+        .settings-section h4 {
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .currency-select {
+            max-width: 200px;
+        }
+
+        .layout-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .layout-option {
+            border: 2px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .layout-option:hover {
+            border-color: var(--primary-color);
+        }
+
+        .layout-option.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(37, 99, 235, 0.1);
+        }
+
+        .layout-option img {
+            width: 100%;
+            height: auto;
+            margin-bottom: 0.5rem;
+            border-radius: var(--border-radius);
+        }
+
+        .layout-option h5 {
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        .save-indicator {
+            display: none;
+            align-items: center;
+            color: #22c55e;
+            margin-top: 0.5rem;
+        }
+
+        .save-indicator i {
+            margin-right: 0.5rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .form-group h5 {
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-content">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Settings</h3>
+            </div>
+
+            <!-- Currency Settings -->
+            <div class="settings-section">
+                <h4>Currency</h4>
+                <p>Choose your preferred currency for displaying amounts.</p>
+
+                <div class="form-group">
+                    <select id="currencySelect" class="form-control currency-select">
+                        <option value="USD">USD - US Dollar</option>
+                        <option value="EUR">EUR - Euro</option>
+                        <option value="GBP">GBP - British Pound</option>
+                        <option value="JPY">JPY - Japanese Yen</option>
+                        <option value="AUD">AUD - Australian Dollar</option>
+                        <option value="CAD">CAD - Canadian Dollar</option>
+                        <option value="CHF">CHF - Swiss Franc</option>
+                        <option value="CNY">CNY - Chinese Yuan</option>
+                        <option value="INR">INR - Indian Rupee</option>
+                        <option value="NZD">NZD - New Zealand Dollar</option>
+                    </select>
+                    <div id="currencySaveIndicator" class="save-indicator">
+                        <i class="fas fa-check"></i> Saved
+                    </div>
+                </div>
+            </div>
+
+            <!-- Layout Settings -->
+            <div class="settings-section">
+                <h4>Dashboard Layout</h4>
+                <p>Choose which elements to show and their arrangement.</p>
+
+                <div class="layout-options">
+                    <div class="form-group">
+                        <h5>Overview Cards</h5>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="show_balance" checked> Current Balance
+                            </label>
+                            <label>
+                                <input type="checkbox" name="show_income" checked> Monthly Income
+                            </label>
+                            <label>
+                                <input type="checkbox" name="show_expenses" checked> Monthly Expenses
+                            </label>
+                            <label>
+                                <input type="checkbox" name="show_cashflow" checked> Net Cashflow
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <h5>Charts</h5>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="show_income_expenses_chart" checked> Income vs Expenses
+                                Chart
+                            </label>
+                            <label>
+                                <input type="checkbox" name="show_category_chart" checked> Category Distribution Chart
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <h5>Chart Preferences</h5>
+                        <label>
+                            Chart Time Range:
+                            <select name="chart_range" class="form-control">
+                                <option value="3">Last 3 months</option>
+                                <option value="6">Last 6 months</option>
+                                <option value="12" selected>Last 12 months</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <h5>Transaction List</h5>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="show_transaction_dates" checked> Show Dates
+                            </label>
+                            <label>
+                                <input type="checkbox" name="show_transaction_categories" checked> Show Categories
+                            </label>
+                            <label>
+                                <input type="checkbox" name="show_transaction_descriptions" checked> Show Descriptions
+                            </label>
+                        </div>
+                        <label>
+                            Transactions per page:
+                            <select name="transactions_per_page" class="form-control">
+                                <option value="10">10</option>
+                                <option value="25" selected>25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="layoutSaveIndicator" class="save-indicator">
+                <i class="fas fa-check"></i> Saved
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+
+            // Currency select change handler
+            document.getElementById('currencySelect').addEventListener('change', saveCurrency);
+
+            // Layout settings change handler
+            document.querySelectorAll('input[type="checkbox"], select').forEach(input => {
+                input.addEventListener('change', saveLayoutSettings);
+            });
+        });
+
+        // Load settings
+        async function loadSettings() {
+            try {
+                // Load currency settings
+                const response = await fetch('/api/settings', {
+                    credentials: 'include'
+                });
+                const settings = await response.json();
+                document.getElementById('currencySelect').value = settings.currency;
+
+                // Load layout settings from localStorage
+                const layoutSettings = JSON.parse(localStorage.getItem('dashboardSettings') || '{}');
+                Object.entries(layoutSettings).forEach(([key, value]) => {
+                    const element = document.querySelector(`[name="${key}"]`);
+                    if (element) {
+                        if (element.type === 'checkbox') {
+                            element.checked = value;
+                        } else {
+                            element.value = value;
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error('Failed to load settings:', err);
+            }
+        }
+
+        // Save layout settings
+        function saveLayoutSettings() {
+            const settings = {};
+
+            // Save checkbox states
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                settings[checkbox.name] = checkbox.checked;
+            });
+
+            // Save select values
+            document.querySelectorAll('select').forEach(select => {
+                if (select.id !== 'currencySelect') { // Skip currency select
+                    settings[select.name] = select.value;
+                }
+            });
+
+            // Save to localStorage
+            localStorage.setItem('dashboardSettings', JSON.stringify(settings));
+
+            // Show save indicator
+            const saveIndicator = document.getElementById('layoutSaveIndicator');
+            saveIndicator.style.display = 'flex';
+            setTimeout(() => {
+                saveIndicator.style.display = 'none';
+            }, 2000);
+
+            // Broadcast settings change event
+            window.dispatchEvent(new CustomEvent('dashboardSettingsChanged', { detail: settings }));
+        }
+
+        // Save currency setting
+        async function saveCurrency() {
+            const currency = document.getElementById('currencySelect').value;
+            const saveIndicator = document.getElementById('currencySaveIndicator');
+
+            try {
+                const response = await fetch('/api/settings', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ currency })
+                });
+
+                if (response.ok) {
+                    saveIndicator.style.display = 'flex';
+                    setTimeout(() => {
+                        saveIndicator.style.display = 'none';
+                    }, 2000);
+                } else {
+                    throw new Error('Failed to save currency setting');
+                }
+            } catch (err) {
+                console.error('Error saving currency:', err);
+                alert('Failed to save currency setting. Please try again.');
+            }
+        }
+    </script>
+</body>
+
+</html>

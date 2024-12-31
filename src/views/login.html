@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Finance Tracker</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-header {
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: #64748b;
+        }
+
+        .discord-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            background-color: #5865F2;
+            color: white;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+
+        .discord-btn:hover {
+            background-color: #4752c4;
+        }
+
+        .discord-btn i {
+            margin-right: 0.75rem;
+            font-size: 1.25rem;
+        }
+
+        .features {
+            margin-top: 2rem;
+            text-align: left;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            color: #64748b;
+        }
+
+        .feature-item i {
+            color: var(--primary-color);
+            margin-right: 0.75rem;
+            font-size: 1.25rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Finance Tracker</h1>
+            <p>Track your finances with ease</p>
+        </div>
+
+        <a href="/auth/discord" class="discord-btn">
+            <i class="fab fa-discord"></i>
+            Login with Discord
+        </a>
+
+        <div class="features">
+            <div class="feature-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Track income and expenses</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-chart-pie"></i>
+                <span>Visualize your spending habits</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-lock"></i>
+                <span>Secure authentication</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-code"></i>
+                <span>API access available</span>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard - Finance Tracker</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="/js/static.js"></script>
+    <style>
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            box-shadow: var(--shadow);
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .transaction-actions {
+                display: flex;
+                gap: 0.5rem;
+            }
+
+            .transaction-amount {
+                font-weight: 600;
+            }
+
+            .transaction-row {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                gap: 0.5rem;
+                padding: 1rem;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            .transaction-details {
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+
+            .transaction-date {
+                font-size: 0.875rem;
+                color: #64748b;
+            }
+
+            .transaction-category {
+                font-size: 0.875rem;
+                color: #64748b;
+            }
+
+            /* Hide table headers on mobile */
+            .transaction-table thead {
+                display: none;
+            }
+
+            /* Stack table cells */
+            .transaction-table,
+            .transaction-table tbody,
+            .transaction-table tr {
+                display: block;
+                width: 100%;
+            }
+
+            .transaction-table td {
+                display: none;
+            }
+
+            /* Show only the mobile view */
+            .transaction-mobile-view {
+                display: block;
+            }
+        }
+
+        /* Desktop styles */
+        @media (min-width: 769px) {
+            .transaction-mobile-view {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <button class="mobile-menu-btn" id="toggleSidebarBtn" aria-label="Toggle Menu">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="main-content">
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Current Balance</h3>
+                </div>
+                <div class="card-body">
+                    <span id="currentBalance" class="amount">$0.00</span>
+                    <div id="dailyBudget" class="daily-budget">
+                        Daily budget: Calculating...
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3>Total Income</h3>
+                </div>
+                <div class="card-body">
+                    <span id="totalIncome" class="amount income">$0.00</span>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3>Total Expenses</h3>
+                </div>
+                <div class="card-body">
+                    <span id="totalExpenses" class="amount expense">$0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Recent Transactions</h3>
+                <button class="btn btn-primary" id="addTransactionBtn">
+                    <i class="fas fa-plus"></i> Add
+                </button>
+            </div>
+
+            <!-- Mobile Transaction View -->
+            <div class="transaction-mobile-view">
+                <div id="transactionsMobileList"></div>
+            </div>
+
+            <!-- Desktop Transaction View -->
+            <div class="table-container">
+                <table class="transaction-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Modal -->
+    <div id="transactionModal" class="modal-overlay" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Add Transaction</h3>
+                <button class="close-modal" id="closeTransactionBtn">&times;</button>
+            </div>
+            <form id="transactionForm">
+                <div class="form-group">
+                    <label>Type</label>
+                    <select name="type" class="form-control" required>
+                        <option value="income">Income</option>
+                        <option value="expense">Expense</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Amount</label>
+                    <input type="number" name="amount" class="form-control" step="0.01" required inputmode="decimal"
+                        pattern="[0-9]*[.,]?[0-9]*">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" name="description" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select name="category_id" class="form-control" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" name="date" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Transaction</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load initial data
+            Promise.all([
+                fetch('/api/settings', { credentials: 'include' }).then(r => r.json()),
+                fetch('/api/transactions', { credentials: 'include' }).then(r => r.json()),
+                fetch('/api/categories', { credentials: 'include' }).then(r => r.json()),
+                fetch('/api/budgets', { credentials: 'include' }).then(r => r.json())
+            ])
+                .then(([settings, transactions, categories, budgets]) => {
+                    // Initialize currency formatter
+                    currencyFormatter = new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: settings.currency || 'USD'
+                    });
+
+                    // Update UI
+                    updateTransactionList(transactions, categories);
+                    updateSummary(transactions);
+                    updateBudgetInfo(budgets, transactions);
+
+                    // Add event listeners
+                    setupEventListeners();
+                })
+                .catch(err => {
+                    console.error('Error loading dashboard:', err);
+                    document.getElementById('transactionsTableBody').innerHTML =
+                        '<tr><td colspan="5">Error loading data. Please refresh the page.</td></tr>';
+                });
+        });
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Add transaction button
+            document.getElementById('addTransactionBtn').addEventListener('click', () => {
+                document.getElementById('transactionModal').style.display = 'flex';
+            });
+
+            // Close modal button
+            document.getElementById('closeTransactionBtn').addEventListener('click', () => {
+                document.getElementById('transactionModal').style.display = 'none';
+            });
+
+            // Transaction form
+            document.getElementById('transactionForm').addEventListener('submit', handleTransactionSubmit);
+
+            // Set default date to today
+            document.querySelector('input[name="date"]').valueAsDate = new Date();
+        }
+
+        // Update transaction list
+        function updateTransactionList(transactions, categories) {
+            const tbody = document.getElementById('transactionsTableBody');
+            const mobileList = document.getElementById('transactionsMobileList');
+
+            // Clear existing content
+            tbody.innerHTML = '';
+            mobileList.innerHTML = '';
+
+            if (transactions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5">No transactions found</td></tr>';
+                mobileList.innerHTML = '<div class="transaction-row">No transactions found</div>';
+                return;
+            }
+
+            transactions.forEach(transaction => {
+                const category = categories.find(c => c.id === transaction.category_id);
+                const amount = currencyFormatter.format(transaction.amount);
+                const date = new Date(transaction.date).toLocaleDateString();
+
+                // Desktop view
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${date}</td>
+                    <td>${transaction.description}</td>
+                    <td>${category ? category.name : 'Uncategorized'}</td>
+                    <td class="${transaction.type === 'income' ? 'income' : 'expense'}">${amount}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTransaction(${transaction.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+
+                // Mobile view
+                const mobileItem = document.createElement('div');
+                mobileItem.className = 'transaction-row';
+                mobileItem.innerHTML = `
+                    <div class="transaction-details">
+                        <div class="transaction-description">${transaction.description}</div>
+                        <div class="transaction-category">${category ? category.name : 'Uncategorized'}</div>
+                        <div class="transaction-date">${date}</div>
+                    </div>
+                    <div class="transaction-info">
+                        <div class="transaction-amount ${transaction.type === 'income' ? 'income' : 'expense'}">
+                            ${amount}
+                        </div>
+                        <div class="transaction-actions">
+                            <button class="btn btn-danger btn-sm" onclick="deleteTransaction(${transaction.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                mobileList.appendChild(mobileItem);
+            });
+        }
+
+        // Update summary
+        function updateSummary(transactions) {
+            const income = transactions
+                .filter(t => t.type === 'income')
+                .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+            const expenses = transactions
+                .filter(t => t.type === 'expense')
+                .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+            const balance = income - expenses;
+
+            document.getElementById('totalIncome').textContent = currencyFormatter.format(income);
+            document.getElementById('totalExpenses').textContent = currencyFormatter.format(expenses);
+            document.getElementById('currentBalance').textContent = currencyFormatter.format(balance);
+        }
+
+        // Update budget information
+        function updateBudgetInfo(budgets, transactions) {
+            const today = new Date();
+            const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+            const remainingDays = daysInMonth - today.getDate() + 1;
+
+            const totalBudget = budgets.reduce((sum, b) => sum + parseFloat(b.amount), 0);
+            const totalSpent = transactions
+                .filter(t => t.type === 'expense' && new Date(t.date).getMonth() === today.getMonth())
+                .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+            const remainingBudget = totalBudget - totalSpent;
+            const dailyAllowance = remainingBudget / remainingDays;
+
+            document.getElementById('dailyBudget').innerHTML = `
+                Daily budget: ${currencyFormatter.format(dailyAllowance)}<br>
+                <small>(${remainingDays} days remaining this month)</small>
+            `;
+        }
+
+        // Handle transaction form submission
+        async function handleTransactionSubmit(event) {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+            const data = {
+                amount: parseFloat(formData.get('amount')),
+                description: formData.get('description'),
+                category_id: parseInt(formData.get('category_id')),
+                type: formData.get('type'),
+                date: formData.get('date') || new Date().toISOString().split('T')[0]
+            };
+
+            try {
+                const response = await fetch('/api/transactions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) throw new Error('Failed to create transaction');
+
+                // Refresh data
+                const [transactions, categories, budgets] = await Promise.all([
+                    fetch('/api/transactions', { credentials: 'include' }).then(r => r.json()),
+                    fetch('/api/categories', { credentials: 'include' }).then(r => r.json()),
+                    fetch('/api/budgets', { credentials: 'include' }).then(r => r.json())
+                ]);
+
+                // Update UI
+                updateTransactionList(transactions, categories);
+                updateSummary(transactions);
+                updateBudgetInfo(budgets, transactions);
+
+                // Clear form and close modal
+                event.target.reset();
+                document.getElementById('transactionModal').style.display = 'none';
+            } catch (err) {
+                console.error('Error creating transaction:', err);
+                alert('Failed to create transaction. Please try again.');
+            }
+        }
+
+        // Delete transaction
+        async function deleteTransaction(id) {
+            if (!confirm('Are you sure you want to delete this transaction?')) return;
+
+            try {
+                const response = await fetch(`/api/transactions/${id}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) throw new Error('Failed to delete transaction');
+
+                // Refresh data
+                const [transactions, categories, budgets] = await Promise.all([
+                    fetch('/api/transactions', { credentials: 'include' }).then(r => r.json()),
+                    fetch('/api/categories', { credentials: 'include' }).then(r => r.json()),
+                    fetch('/api/budgets', { credentials: 'include' }).then(r => r.json())
+                ]);
+
+                // Update UI
+                updateTransactionList(transactions, categories);
+                updateSummary(transactions);
+                updateBudgetInfo(budgets, transactions);
+            } catch (err) {
+                console.error('Error deleting transaction:', err);
+                alert('Failed to delete transaction. Please try again.');
+            }
+        }
+    </script>
+</body>
